@@ -11,7 +11,7 @@ class CommentController extends Controller
     public function index()
     {
         $comments = Comment::latest()->get();
-        return view('form', compact('comments'));
+        return view('comments', compact('comments'));
     }
 
     // عرض صفحة التعليقات
@@ -39,6 +39,6 @@ class CommentController extends Controller
         ]);
 
         // إعادة التوجيه مع رسالة شكر
-        return redirect()->route('comments.index')->with('success', 'شكرًا لك! لقد تم استلام تعليقك بنجاح.');
+        return redirect()->route('comments.create')->with('success', 'شكرًا لك! لقد تم استلام تعليقك بنجاح.');
     }
 }

@@ -1,24 +1,14 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>التعليقات</title>
-    
-    <!-- ربط Google Fonts - Cairo -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- ربط Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- ربط Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
     <style>
-        html,
-        body {
+        html, body {
             height: 100%;
             width: 100%;
             background-color: #334;
@@ -26,7 +16,6 @@
             color: white;
             font-family: 'Cairo', sans-serif;
         }
-
         .fb-form {
             position: absolute;
             top: 50%;
@@ -55,17 +44,6 @@
             border-radius: 5px;
             font-size: 1.1em;
             margin-bottom: 20px;
-        }
-
-        .fb-form input::placeholder,
-        .fb-form textarea::placeholder {
-            color: #aaa;
-            font-size: 1em;
-        }
-
-        .fb-form textarea {
-            height: 120px;
-            resize: none;
         }
 
         .rating {
@@ -98,26 +76,15 @@
                 color: yellow;
             }
 
-            20% {
-                transform: rotate(10deg) scale(0.8);
-            }
-
-            50% {
-                transform: rotate(-5deg) scale(1.1);
-            }
-
-            80% {
-                transform: rotate(5deg) scale(0.9);
-            }
-
             100% {
                 transform: rotate(0deg) scale(1);
             }
         }
 
-        /* رسالة الشكر */
         .thank-you {
-            display: none;
+            @if(!session('success'))
+                display: none;
+            @endif
             position: absolute;
             top: 50%;
             left: 50%;
@@ -142,7 +109,6 @@
             color: #f0f0f0;
         }
 
-        /* استجابة على حجم الشاشة */
         @media (max-width: 576px) {
             .fb-form,
             .thank-you {
@@ -173,32 +139,43 @@
 </head>
 
 <body>
-   
-    <div class="fb-form">
-        <form id="feedback-form" class="form-group">
-            <h2>أضف تعليقك</h2>
-            <input class="form-control" placeholder="الاسم" type="text" required>
-            <textarea class="form-control" id="fb-comment" name="comment" placeholder="اكتب تعليقك هنا" required></textarea>
-            <div class="rating">
-                <i class="fa fa-star" data-rating="1"></i>
-                <i class="fa fa-star" data-rating="2"></i>
-                <i class="fa fa-star" data-rating="3"></i>
-                <i class="fa fa-star" data-rating="4"></i>
-                <i class="fa fa-star" data-rating="5"></i>
-            </div>
-            <input class="form-control btn btn-primary" type="submit" value="اضف التعليق">
-        </form>
-    </div>
 
-    <div class="thank-you">
-        <h2>شكرًا لك!</h2>
-        <p>لقد تم استلام تعليقك بنجاح. نحن نقدر وقتك وملاحظاتك.</p>
-    </div>
+    @if(session('success'))
+        <div class="thank-you">
+            <h2>شكرًا لك!</h2>
+            <p>{{ session('success') }}</p>
+        </div>
+    @else
+        <div class="fb-form">
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    <ul style="list-style: none;">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-    <!-- ربط jQuery و Bootstrap JS -->
+            <form id="feedback-form" class="form-group" action="{{ route('comments.store') }}" method="POST">
+                @csrf
+                <h2>أضف تعليقك</h2>
+                <input class="form-control" name="user_name" placeholder="الاسم" type="text">
+                <textarea class="form-control" name="comment" placeholder="اكتب تعليقك هنا" required></textarea>
+                <div class="rating">
+                    <i class="fa fa-star" data-rating="1"></i>
+                    <i class="fa fa-star" data-rating="2"></i>
+                    <i class="fa fa-star" data-rating="3"></i>
+                    <i class="fa fa-star" data-rating="4"></i>
+                    <i class="fa fa-star" data-rating="5"></i>
+                </div>
+                <input type="hidden" name="rating" id="rating-value" value="0">
+                <input class="form-control btn btn-primary" type="submit" value="اضف التعليق">
+            </form>
+        </div>
+    @endif
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const stars = document.querySelectorAll('.fa-star');
@@ -212,6 +189,7 @@
                     setTimeout(() => {
                         star.classList.remove('animate');
                     }, 500);
+                    document.getElementById('rating-value').value = rating;
                 });
 
                 star.addEventListener('mouseover', () => {
@@ -242,21 +220,7 @@
                     }
                 });
             }
-
-            // التعامل مع إرسال النموذج
-            const form = document.getElementById('feedback-form');
-            const thankYouMessage = document.querySelector('.thank-you');
-
-            form.addEventListener('submit', function (e) {
-                e.preventDefault(); // منع إعادة تحميل الصفحة
-                // هنا يمكنك إضافة كود لإرسال البيانات إلى الخادم إذا لزم الأمر
-
-                // إخفاء النموذج وعرض رسالة الشكر
-                document.querySelector('.fb-form').style.display = 'none';
-                thankYouMessage.style.display = 'block';
-            });
         });
     </script>
 </body>
-
 </html>
