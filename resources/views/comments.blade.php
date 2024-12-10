@@ -15,16 +15,25 @@
         html, body {
             height: 100%;
             width: 100%;
-            background-color: #334;
-            color: white;
-            font-family: 'Cairo', sans-serif;
             margin: 0;
             padding: 0;
+            font-family: 'Cairo', sans-serif;
+            color: white;
+        }
+
+        /* حاوية الخلفية */
+        body {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: background-image 1s ease-in-out;
         }
 
         .container {
             padding-top: 50px;
             padding-bottom: 50px;
+            position: relative;
+            z-index: 2; /* لضمان أن النص فوق الخلفية */
         }
 
         .comments-title {
@@ -64,7 +73,7 @@
             font-size: 1.1em;
             line-height: 1.6em;
             color: #f0f0f0;
-            white-space: pre-wrap; /* لعرض النصوص كما أدخلت */
+            white-space: pre-wrap; 
         }
 
         .no-comments {
@@ -93,6 +102,14 @@
             background-color: #004999;
         }
 
+        .alert {
+            background-color: rgba(0,128,0,0.8)!important;
+            color: #fff!important;
+            border: none!important;
+            box-shadow:0 0 10px rgba(0,0,0,0.5)!important;
+            text-align: center;
+        }
+
         @media (max-width: 576px) {
             .comment-header {
                 flex-direction: column;
@@ -111,7 +128,7 @@
         <h1 class="comments-title">التعليقات</h1>
 
         @if(session('success'))
-            <div class="alert alert-success text-center" style="background-color:rgba(0,128,0,0.8); color:#fff; border:none; box-shadow:0 0 10px rgba(0,0,0,0.5);">
+            <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
@@ -144,5 +161,28 @@
        
     </div>
 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var backgrounds = @json($backgrounds->pluck('image_url'));
+            
+            if (backgrounds.length > 0) {
+                var currentIndex = 0;
+                var changeInterval = 5000; // 5 ثواني مثلاً، يمكنك زيادتها لـ10000 لـ10 ثواني
+
+                function changeBackground() {
+                    // وضع الخلفية الحالية
+                    document.body.style.backgroundImage = 'url(' + backgrounds[currentIndex] + ')';
+                    // تحديث المؤشر
+                    currentIndex = (currentIndex + 1) % backgrounds.length;
+                }
+
+                // استدعاء الخلفية الأولى حال التحميل
+                changeBackground();
+                // تغيير كل 5 ثواني
+                setInterval(changeBackground, changeInterval);
+            }
+        });
+    </script>
 </body>
 </html>

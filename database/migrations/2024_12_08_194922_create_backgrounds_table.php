@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('backgrounds', function (Blueprint $table) {
             $table->id();
-            $table->string('img')->nullable();
+            $table->string('image_url')->nullable();
             $table->timestamps();
         });
     }

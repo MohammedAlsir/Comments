@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Background;
 use Illuminate\Http\Request;
 use App\Models\Comment;
 
@@ -11,8 +12,10 @@ class CommentController extends Controller
     public function index()
     {
         $comments = Comment::latest()->get();
-        return view('comments', compact('comments'));
+        $backgrounds = Background::all(); // جلب كل الخلفيات
+        return view('comments', compact('comments', 'backgrounds'));
     }
+    
 
     // عرض صفحة التعليقات
     public function create()
